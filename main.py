@@ -4,8 +4,8 @@ from sqltostaging.full.toStaging import ToStaging as toStaging_full
 from sqltostaging.incremental.toStaging import ToStaging as toStaging_incremental
 from managment.cleanstaging.cleanStaging import CleanStaging 
 from myFramework.utils.readYaml import ReadYaml
-from stagingtodv.nodatemanaged.toDV import ToDV
-
+# from stagingtodv.SCDType1.toDV import ToDV
+from stagingtodv.SCDType2.toDV import ToDV
 
 # ---------------------------DV----------------
 
@@ -24,12 +24,24 @@ from stagingtodv.nodatemanaged.toDV import ToDV
 # incremental
 # create ReadYaml object
 
-testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/incremental.yaml", 'dvdrental.rental')
-test = ToDV(testread.path, testread.key)
-sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(),test.getfilterColumn(), "2006-02-14", "2006-02-15")
-ganaretedDF = utils.generateSurogateKey(sourceDF,test.getCode(), test.getNaturalKey() )
-utils.fillPosgres(ganaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName())
+# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/incremental.yaml", 'dvdrental.rental')
+# test = ToDV(testread.path, testread.key)
+# sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(),test.getfilterColumn(), "2006-02-14", "2006-02-15").drop("insertion_date",  axis=1)
+# genaretedDF = utils.generateSurogateKey(sourceDF,test.getCode(), test.getNaturalKey() )
+# # print(genaretedDF)
+# utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName())
 
+
+# SCDType2
+
+# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/SCDType2.yaml", 'dvdrental.customer')
+# test = ToDV(testread.path, testread.key)
+# sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(),test.getfilterColumn(), "2013-05-26")
+# targetDF = utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema())
+# print(utils.toSCD2(sourceDF, targetDF))
+# newSourceDF = utils.toSCD2(sourceDF, targetDF)
+# ganaretedDF = utils.generateSurogateKey(newSourceDF,test.getCode(), test.getNaturalKey() )
+# utils.fillPosgres(ganaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName())
 
 
 
@@ -42,16 +54,18 @@ utils.fillPosgres(ganaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}
   
    
 # full load
-# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/tostaging/dvdrental/full.yaml", 'public.category')
-# test = toStaging_full(testread.path, testread.key)
-# sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema())
-# utils.fillPosgres(sourceDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName())
+testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/tostaging/dvdrental/full.yaml", 'public.store')
+test = toStaging_full(testread.path, testread.key)
+sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema())
+utils.fillPosgres(sourceDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName())
+
 
 # incremental 
 # testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/tostaging/dvdrental/incremental.yaml", 'public.payment')
 # test = toStaging_incremental(testread.path, testread.key)
-# sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(),test.getfilterColumn(), "2007-02-10", "2007-05-16")
-# utils.fillPosgres(sourceDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName())
+# sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(),test.getfilterColumn(), "2007-02-10", "2007-02-16")
+# newsourceDF = utils.addInsertionDate(sourceDF)
+# utils.fillPosgres(newsourceDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName())
 
 # clean staging
 # cleantestread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/tostaging/dvdrental/full.yaml", 'public.category')
