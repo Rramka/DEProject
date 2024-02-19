@@ -2,7 +2,7 @@ dvdrental.customer:
   SourceTableName: customer
   SourceDBName: DBStaging
   SourceSchema: dvdrental
-  TableType: FULL
+  TableType: SCD
   DestDBName: DBDV
   DestTableName: customer
   DestSchema: dvdrental
@@ -14,7 +14,7 @@ dvdrental.inventory:
   SourceTableName: inventory
   SourceDBName: DBStaging
   SourceSchema: dvdrental
-  TableType: FULL
+  TableType: SCD
   DestDBName: DBDV
   DestTableName: inventory
   DestSchema: dvdrental
@@ -26,7 +26,7 @@ dvdrental.address:
   SourceTableName: address
   SourceDBName: DBStaging
   SourceSchema: dvdrental
-  TableType: FULL
+  TableType: SCD
   DestDBName: DBDV
   DestTableName: address
   DestSchema: dvdrental
@@ -38,7 +38,7 @@ dvdrental.staff:
   SourceTableName: staff
   SourceDBName: DBStaging
   SourceSchema: dvdrental
-  TableType: FULL
+  TableType: SCD
   DestDBName: DBDV
   DestTableName: staff
   DestSchema: dvdrental
