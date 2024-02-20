@@ -3,12 +3,14 @@ dvdrental.film_actor:
   SourceDBName: DBStaging
   SourceSchema: dvdrental
   TableType: LINK
+  InsertionType: append
   DestDBName: DBDV
   DestTableName: film_actor
   DestSchema: dvdrental
   FilterColumn: last_update
-  NaturalKey: film_id
-  NaturalKey: actor_id
+  NaturalKey: 
+    film_id
+    actor_id
   Code: 1
 
 dvdrental.film_category:
@@ -16,10 +18,12 @@ dvdrental.film_category:
   SourceDBName: DBStaging
   SourceSchema: dvdrental
   TableType: LINK
+  InsertionType: append
   DestDBName: DBDV
   DestTableName: film_category
   DestSchema: dvdrental
   FilterColumn: last_update
-  NaturalKey: film_id
-  NaturalKey: category_id
+  NaturalKey: 
+    film_id
+    category_id
   Code: 1

@@ -16,10 +16,10 @@ def getDF( source_dbname, tablename, schema):
     query = f"select T.* from {schema}.{tablename} T"
     return pd.read_sql(query ,conn.getConnection(source_dbname))
 
-@dispatch(str, str, str, str, str)
-def getDF( source_dbname, tablename,schema,filterColumn, dateFrom):
-    query = f"select T.* from {schema}.{tablename} T where {filterColumn} >= '{dateFrom}'  "
-    return pd.read_sql(query ,conn.getConnection(source_dbname))
+# @dispatch(str, str, str, str, str)
+# def getDF( source_dbname, tablename,schema,filterColumn, dateFrom):
+#     query = f"select T.* from {schema}.{tablename} T where {filterColumn} >= '{dateFrom}'  "
+#     return pd.read_sql(query ,conn.getConnection(source_dbname))
 
 @dispatch(str, str, str, str, str,str)
 def getDF( source_dbname, tablename,schema,filterColumn, dateFrom, dateTo):
@@ -29,16 +29,22 @@ def getDF( source_dbname, tablename,schema,filterColumn, dateFrom, dateTo):
 def addInsertionDate(df: pd.DataFrame ):
       return df.assign(insertion_date = lambda x: datetime.now())
 
-# def drop
 
-def generateSurogateKey(df, code, NaturalKey):
+def generateSurogateKey(df, code, NaturalKeyList):
       newdf = pd.DataFrame(df)
-      NaturalKey = newdf[NaturalKey]+int(str(1000000) + str(code))
-      return newdf.assign(surogatekey = pd.Series(NaturalKey).values) 
+      col_list = list(newdf.columns)
+      for key in NaturalKeyList:
+        NaturalKey = newdf[key]+int(str(1000000) + str(code))
+        newdf = newdf.assign(tmpkey = pd.Series(NaturalKey).values).drop(f'{key}', axis=1)
+        newdf.rename(columns={'tmpkey':f'gen_{key}'}, inplace=True) 
+        col_list.remove(key)
+        col_list.insert(0,f"gen_{key}")
+      newdf = newdf.reindex(col_list, axis=1) 
+      return newdf 
 
-def fillPosgres( df, dst_dbname, schema, tablename):
+def fillPosgres( df, dst_dbname, schema, tablename, insertiontype):
         df.to_sql(tablename, conn.getConnection(dst_dbname)
-                , schema=f"{schema}", if_exists='replace', index=False)
+                , schema=f"{schema}", if_exists=insertiontype, index=False)
         
 def toSCD2(srcDF: pd.DataFrame, targetDF: pd.DataFrame):
       final_df = scd2(srcDF, targetDF)

@@ -47,4 +47,7 @@ class ReadYaml:
     
     def getNaturalKey(self):
         return self.__getYaml()['NaturalKey']
+    
+    def getInsertionType(self):
+        return self.__getYaml()['InsertionType']
 
