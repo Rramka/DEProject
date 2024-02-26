@@ -8,7 +8,12 @@ dvdrental.rental:
   DestTableName: rental
   DestSchema: dvdrental
   FilterColumn: rental_date
-  NaturalKey: 
+  NaturalKey:
+    rental_id
+  SurogateKey:
+    inventory_id
+    customer_id
+    staff_id
     rental_id
   Code: 1
 
@@ -21,7 +26,12 @@ dvdrental.payment:
   DestDBName: DBDV
   DestTableName: payment
   DestSchema: dvdrental
-  FilterColumn: rental_date
-  NaturalKey: 
+  FilterColumn: payment_date
+  NaturalKey:
     payment_id
+  SurogateKey:
+    payment_id
+    customer_id
+    staff_id
+    rental_id
   Code: 1

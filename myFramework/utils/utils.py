@@ -30,17 +30,23 @@ def addInsertionDate(df: pd.DataFrame ):
       return df.assign(insertion_date = lambda x: datetime.now())
 
 
-def generateSurogateKey(df, code, NaturalKeyList):
+def generateSurogateKey(df, code, SurogatekeyList, dest_col_list):
       newdf = pd.DataFrame(df)
-      col_list = list(newdf.columns)
-      for key in NaturalKeyList:
-        NaturalKey = newdf[key]+int(str(1000000) + str(code))
-        newdf = newdf.assign(tmpkey = pd.Series(NaturalKey).values).drop(f'{key}', axis=1)
-        newdf.rename(columns={'tmpkey':f'gen_{key}'}, inplace=True) 
-        col_list.remove(key)
-        col_list.insert(0,f"gen_{key}")
-      newdf = newdf.reindex(col_list, axis=1) 
-      return newdf 
+      for key in SurogatekeyList:
+        # print(key)
+        Surogatekey = newdf[key]+int(str(1000000) + str(code))
+        newdf = newdf.assign(tmpkey = pd.Series(Surogatekey).values).drop(f'{key}', axis=1)
+        newdf.rename(columns={'tmpkey':f'gen_{key}'}, inplace=True)
+      newdf = newdf.reindex(dest_col_list, axis=1)
+      return newdf
+
+def GenerateNaturalKey(df, Naturalkey):
+    newdf = pd.DataFrame(df)
+    NaturalValue = newdf[Naturalkey]
+    newdf = newdf.assign(tmpkey = pd.Series(NaturalValue).values)
+    newdf.rename(columns={'tmpkey':f'source_{Naturalkey}'}, inplace=True)
+    return newdf
+
 
 def fillPosgres( df, dst_dbname, schema, tablename, insertiontype):
         df.to_sql(tablename, conn.getConnection(dst_dbname)

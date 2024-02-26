@@ -9,36 +9,45 @@ from stagingtodv.SCDType2.toDV import ToDV
 
 # ---------------------------DV----------------
 
-#link
-testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/link.yaml", 'dvdrental.film_category')
-test = ToDV(testread.path, testread.key)
-sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(),test.getfilterColumn(),  "2005-05-26", "2020-05-26").drop("insertion_date",  axis=1)
-genaretedDF = utils.generateSurogateKey(sourceDF,test.getCode(), list(test.getNaturalKey().split(" ")))
-# print(genaretedDF)
-utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName(),test.getInsertionType())
-
 
 
 # Full - SCDType1
 # create ReadYaml object
 
-# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/SCDType1.yaml", 'dvdrental.language')
+testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/SCDType1.yaml", 'dvdrental.language')
+test = ToDV(testread.path, testread.key)
+sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema())
+dest_col_list = list(utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema()).columns)
+generatenaturalDF = utils.GenerateNaturalKey(sourceDF, test.getNaturalKey())
+genaretedDF = utils.generateSurogateKey(generatenaturalDF,test.getCode(), list(test.getSurogateKey().split(" ")), dest_col_list)
+# print(sourceDF)
+utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName(), test.getInsertionType())
+
+
+
+#link
+# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/link.yaml", 'dvdrental.film_actor')
 # test = ToDV(testread.path, testread.key)
-# sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema())
-# ganaretedDF = utils.generateSurogateKey(sourceDF,test.getCode(), list(test.getNaturalKey().split(" ")))
-# utils.fillPosgres(ganaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName())
+# sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(), ).drop("insertion_date",  axis=1)
+# dest_col_list = list(utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema()).columns)
+# genaretedDF = utils.generateSurogateKey(sourceDF, test.getCode(), list(test.getSurogateKey().split(" ")),dest_col_list)
+# utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName(),test.getInsertionType())
+
+# ,"2005-05-26", "2020-05-26"test.getfilterColumn()     for incremental loading
 
 
 # incremental
 # create ReadYaml object
 
-# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/incremental.yaml", 'dvdrental.rental')
+# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/incremental.yaml", 'dvdrental.payment')
 # test = ToDV(testread.path, testread.key)
-# sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(),test.getfilterColumn(), "2006-02-14", "2006-02-15").drop("insertion_date",  axis=1)
-# genaretedDF = utils.generateSurogateKey(sourceDF,test.getCode(), list(test.getNaturalKey().split(" ")))
-# # print(genaretedDF)
-# utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName())
+# sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema()).drop("insertion_date",  axis=1)
+# dest_col_list = list(utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema()).columns)
+# generatenaturalDF = utils.GenerateNaturalKey(sourceDF, test.getNaturalKey())
+# genaretedDF = utils.generateSurogateKey(generatenaturalDF,test.getCode(), list(test.getSurogateKey().split(" ")) ,dest_col_list)
+# utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName(), test.getInsertionType())
 
+# ,test.getfilterColumn(), "2006-02-14", "2006-02-15"    -- for incremental
 
 # SCDType2
 

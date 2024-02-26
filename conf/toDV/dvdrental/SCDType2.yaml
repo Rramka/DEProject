@@ -3,6 +3,7 @@ dvdrental.customer:
   SourceDBName: DBStaging
   SourceSchema: dvdrental
   TableType: SCD
+  InsertionType: replace
   DestDBName: DBDV
   DestTableName: customer
   DestSchema: dvdrental
@@ -15,6 +16,7 @@ dvdrental.inventory:
   SourceDBName: DBStaging
   SourceSchema: dvdrental
   TableType: SCD
+  InsertionType: replace
   DestDBName: DBDV
   DestTableName: inventory
   DestSchema: dvdrental
@@ -27,6 +29,7 @@ dvdrental.address:
   SourceDBName: DBStaging
   SourceSchema: dvdrental
   TableType: SCD
+  InsertionType: replace
   DestDBName: DBDV
   DestTableName: address
   DestSchema: dvdrental
@@ -39,9 +42,31 @@ dvdrental.staff:
   SourceDBName: DBStaging
   SourceSchema: dvdrental
   TableType: SCD
+  InsertionType: replace
   DestDBName: DBDV
   DestTableName: staff
   DestSchema: dvdrental
   NaturalKey: staff_id
+  SurogateKey:
+    staff_id
+    address_id
+    store_id
   FilterColumn: last_update
+  RenameColumn:
+    """'gen_staff_id':   'staff_id'"""
+    """'gen_address_id': 'address_id'"""
+    """'gen_store_id':   'store_id'"""
+  Code: 1
+
+
+  dvdrental.store:
+  SourceTableName: store
+  SourceDBName: DBStaging
+  SourceSchema: dvdrental
+  TableType: FULL
+  InsertionType: replace
+  DestDBName: DBDV
+  DestTableName: store
+  DestSchema: dvdrental
+  NaturalKey: store_id
   Code: 1
