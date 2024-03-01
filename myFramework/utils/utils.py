@@ -3,6 +3,8 @@ import pandas as pd
 from multipledispatch import dispatch
 from pandas_scd import scd2
 from datetime import datetime
+import pytz
+import duckdb
 
 def getTbaleList(dbname, schema):
         return pd.read_sql(f"select tablename  from pg_catalog.pg_tables where schemaname = '{schema}'", conn.getConnection(dbname))
@@ -55,3 +57,181 @@ def fillPosgres( df, dst_dbname, schema, tablename, insertiontype):
 def toSCD2(srcDF: pd.DataFrame, targetDF: pd.DataFrame):
       final_df = scd2(srcDF, targetDF)
       return final_df
+
+def create_time_parts(tz):
+    if tz:
+        tz = pytz.timezone(tz)
+    now = datetime.now(tz)
+    now_parts = [str(i) for i in[now.year, now.month, now.day, now.hour, now.minute, now.second]]
+    return ",".join(now_parts)
+
+def scd2(src: pd.DataFrame, tgt: pd.DataFrame, cols_to_track: list=None, tz: str=None) -> pd.DataFrame:
+
+
+    
+    if not cols_to_track:
+        cols = list(src.columns)
+        cols.remove('last_update')
+        cols_to_track = list(cols)
+        # print(cols_to_track)
+
+    if not isinstance(cols_to_track, list):
+        raise TypeError('cols_to_track must be of type list')
+    
+    duck = duckdb.connect()
+    duckdb.default_connection.execute("SET GLOBAL pandas_analyze_sample=100000")
+
+    time_parts = create_time_parts(tz)
+
+    duck.execute(f"CREATE TABLE source_scd AS SELECT *, md5(concat_ws('_', {','.join(cols_to_track)})) as hash FROM src")
+    duck.execute(f"CREATE TABLE target_scd as select *, md5(concat_ws('_', {','.join(cols_to_track)})) as hash from tgt")
+
+    results = {}
+
+    # rows that are in both target and source, and active
+    ### unchanged_active_keys (active - old) ###
+    duck.execute("""
+        CREATE TABLE unchanged_active_keys as 
+        select * 
+        from target_scd
+        where is_active = True
+        and exists(
+            select * 
+            from source_scd
+            where target_scd.hash = source_scd.hash
+        )
+        """)
+    
+    unchanged_active_keys = duck.execute("select count(*) from unchanged_active_keys").fetchone()[0]
+    results['unchanged active keys (active - old)'] = unchanged_active_keys
+
+     # rows that are in the target but no longer in the source, and are inactive
+    ### unchanged_inactive_keys (inactive - old) ###
+    duck.execute("""
+        CREATE TABLE unchanged_inactive_keys as 
+        select * 
+        from target_scd
+        where is_active = False
+        and not exists(
+            select * 
+            from source_scd
+            where target_scd.hash = source_scd.hash
+        )
+        """)
+
+    unchanged_inactive_keys = duck.execute("select count(*) from unchanged_inactive_keys").fetchone()[0]
+    results['unchanged inactive keys (inactive - old)'] = unchanged_inactive_keys
+
+     # rows that are in the target but no longer in the source, and are active
+    ### ended_keys (inactive - new) ###
+    
+    duck.execute(f"""
+    create table ended_keys as 
+    select * EXCLUDE (end_ts, is_active, hash),
+    current_timestamp as end_ts,
+    0 as is_active,
+    from target_scd
+    where is_active = True
+    and not exists (
+        select * 
+        from source_scd
+        where target_scd.hash = source_scd.hash
+    )
+    """)
+
+
+    ended_keys = duck.execute("select count(*) from ended_keys").fetchone()[0]
+    results['ended keys (inactive - new)'] = ended_keys
+
+    # rows that are in the source but not in the target
+    ### new_keys (active - new) ###
+    duck.execute(f"""
+    create table new_keys as 
+    select * EXCLUDE (hash),
+    current_timestamp as start_ts,
+    null as end_ts,
+    1 as is_active,
+    from source_scd
+    where not exists (
+        select * 
+        from target_scd
+        where target_scd.hash = source_scd.hash
+    )
+    """)
+
+    new_keys = duck.execute("select count(*) from new_keys").fetchone()[0]
+    results['new keys (active - new)'] = new_keys
+
+    duck.execute("""
+    create table final as 
+    select * EXCLUDE(hash) from unchanged_active_keys
+    union all by name 
+    select * EXCLUDE(hash) from unchanged_inactive_keys
+    union all by name 
+    select * from ended_keys   
+   -- union all by name 
+   -- select * from new_keys
+    """)
+
+  
+
+    # print(duck.execute("select * from unchanged_active_keys").fetch_df())
+    # print('unchanged_active_keys')
+    # print(duck.execute("select * from unchanged_inactive_keys").fetch_df())
+    # print('unchanged_inactive_keys')
+    # print(duck.execute("select * from ended_keys").fetch_df())
+    # print('ended_keys')
+    print(duck.execute("select * from new_keys").fetch_df())
+    print('new_keys')
+
+
+    # print(results)
+
+    # duck.execute("select * from unchanged_active_keys").fetch_df()  
+    
+
+    df = duck.execute("select * from final").fetch_df()
+    # .drop("last_update",  axis=1)  
+
+    return df
+
+
+def scdtest(source_df, target_df, cols_to_track: list=None):
+
+    if not cols_to_track:
+        cols = list(source_df.columns)
+        cols_to_track = list(cols)
+
+
+#  Check if target data is empty (initial load)
+    if target_df.empty:
+        # Add "start_date" column with current date for initial load
+        source_df["start_ts"] = pd.to_datetime("today")
+        source_df["end_ts"] = pd.NA
+        # Copy source data to target data
+        target_df = source_df.copy()
+    
+    else:
+        # define new records in source df and add start date 
+        new_df = source_df[~source_df["store_id"].isin(target_df["store_id"])]
+        new_df["start_ts"] = pd.to_datetime("today")
+        
+        # define existing record in source df 
+        old_df = source_df[source_df["store_id"].isin(target_df["store_id"])]
+
+        # define updated rows ins target df
+        merge_df = old_df.merge(target_df, on=cols_to_track, how='outer', indicator=True)
+        diff_in_old_df_df = merge_df[merge_df['_merge']=='left_only']        
+        diff_in_old_df_df["start_ts"] = pd.to_datetime("today")
+        data_diff_in_old_df = diff_in_old_df_df.drop(columns=['_merge'])
+
+
+        # Update existing records in target data is source df exist change records
+        for index, row in data_diff_in_old_df.iterrows():
+            target_df.loc[target_df["store_id"] == row["store_id"], "end_ts"] = pd.to_datetime("today")
+        
+        # Concatenate updated and new data to target data
+        target_df = pd.concat([target_df,data_diff_in_old_df,new_df ], ignore_index=True)
+
+    # Print the final target DataFrame
+    return target_df

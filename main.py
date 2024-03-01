@@ -6,22 +6,49 @@ from managment.cleanstaging.cleanStaging import CleanStaging
 from myFramework.utils.readYaml import ReadYaml
 # from stagingtodv.SCDType1.toDV import ToDV
 from stagingtodv.SCDType2.toDV import ToDV
+from datetime import datetime
 
 # ---------------------------DV----------------
+
+
+# SCDType2
+
+testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/SCDType2.yaml", 'dvdrental.store')
+test = ToDV(testread.path, testread.key)
+sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(),test.getfilterColumn(), "2013-05-26", "2034-02-28").drop("last_update",  axis=1)
+targetDF = utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema())
+
+# print(sourceDF)
+
+testDF = utils.scdtest(sourceDF,targetDF)
+
+print('test_df')
+print(testDF)
+
+# newSourceDF = utils.toSCD2(sourceDF, targetDF)
+# genaretedDF = utils.generateSurogateKey(newSourceDF,test.getCode(), list(test.getNaturalKey().split(" ")))
+utils.fillPosgres(testDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName(), test.getInsertionType())
+
+# ,test.getfilterColumn(), "2013-05-26", "2005-05-26"
+
+
+
+
+
 
 
 
 # Full - SCDType1
 # create ReadYaml object
 
-testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/SCDType1.yaml", 'dvdrental.language')
-test = ToDV(testread.path, testread.key)
-sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema())
-dest_col_list = list(utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema()).columns)
-generatenaturalDF = utils.GenerateNaturalKey(sourceDF, test.getNaturalKey())
-genaretedDF = utils.generateSurogateKey(generatenaturalDF,test.getCode(), list(test.getSurogateKey().split(" ")), dest_col_list)
-# print(sourceDF)
-utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName(), test.getInsertionType())
+# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/SCDType1.yaml", 'dvdrental.language')
+# test = ToDV(testread.path, testread.key)
+# sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema())
+# dest_col_list = list(utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema()).columns)
+# generatenaturalDF = utils.GenerateNaturalKey(sourceDF, test.getNaturalKey())
+# genaretedDF = utils.generateSurogateKey(generatenaturalDF,test.getCode(), list(test.getSurogateKey().split(" ")), dest_col_list)
+# # print(sourceDF)
+# utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName(), test.getInsertionType())
 
 
 
@@ -49,16 +76,6 @@ utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}
 
 # ,test.getfilterColumn(), "2006-02-14", "2006-02-15"    -- for incremental
 
-# SCDType2
-
-# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/SCDType2.yaml", 'dvdrental.customer')
-# test = ToDV(testread.path, testread.key)
-# sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(),test.getfilterColumn(), "2013-05-26", "2005-05-26")
-# targetDF = utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema())
-# # print(utils.toSCD2(sourceDF, targetDF))
-# newSourceDF = utils.toSCD2(sourceDF, targetDF)
-# genaretedDF = utils.generateSurogateKey(newSourceDF,test.getCode(), list(test.getNaturalKey().split(" ")))
-# utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName())
 
 
 
@@ -90,3 +107,28 @@ utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}
 # t = CleanStaging()
 # t.cleanStaging('DBStaging', 'dvdrental', 'category', 2023, 12, 28)
 
+
+
+
+
+
+#  Zveli data
+    # aqtiuri
+    # araaqtiuri
+
+#  axali data
+
+
+# ის ჩანაწერები რომლებიც არ იცვლება (აქტიური ) - ანუ ახალ დატასთან საერთო  აქვს
+
+# ის ჩანაწერები რომლებიც არ იცვლება (არააქტიური) - ანუ ახალ დატასთან საერთო არაფერი აქვს
+
+# ის ახალი ჩანაწერი რომელიც საერღთოდ არ ხვდება ძველში - ანუ ისტორიულობა არ აქვს და საერთოდ ახალია
+
+# ის ჩანაწერები რომლებიც იცვლება (აქტიური) - ანუ ახალ დატასთან აქვს საერთო(აქტიური ჩანაწერი გადავა არააქტიურიში და დაემატება ახალი აქტიური ჩანაწერი)
+
+
+
+# 1) ძველ დატაში ისეთი აქტიური ჩანაწერები რომლების არის ახალ დატაშიც
+# 2) ძველ დატაში ისეთი არააქტირუი ჩანაწერები რომლებიც არ არის ახალ დატაში
+# 3) 
