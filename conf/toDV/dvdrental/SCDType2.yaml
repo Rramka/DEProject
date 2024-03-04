@@ -10,8 +10,6 @@ dvdrental.staff:
   NaturalKey: staff_id
   SurogateKey:
     staff_id
-    address_id
-    store_id
   FilterColumn: last_update
   Code: 1 
 
@@ -26,6 +24,8 @@ dvdrental.customer:
   DestSchema: dvdrental
   FilterColumn: last_update
   NaturalKey: customer_id
+  SurogateKey:
+    customer_id
   Code: 1
 
 dvdrental.inventory:
@@ -38,6 +38,8 @@ dvdrental.inventory:
   DestTableName: inventory
   DestSchema: dvdrental
   NaturalKey: inventory_id
+  SurogateKey:
+    inventory_id
   FilterColumn: last_update
   Code: 1
 
@@ -51,6 +53,8 @@ dvdrental.address:
   DestTableName: address
   DestSchema: dvdrental
   NaturalKey: address_id
+  SurogateKey:
+    address_id
   FilterColumn: last_update
   Code: 1
 
@@ -65,5 +69,7 @@ dvdrental.store:
   DestTableName: store
   DestSchema: dvdrental
   NaturalKey: store_id
+  SurogateKey:
+    store_id
   FilterColumn: last_update
   Code: 1

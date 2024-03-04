@@ -13,29 +13,17 @@ from datetime import datetime
 
 # SCDType2
 
-testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/SCDType2.yaml", 'dvdrental.store')
+testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/SCDType2.yaml", 'dvdrental.address')
 test = ToDV(testread.path, testread.key)
-sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(),test.getfilterColumn(), "2013-05-26", "2034-02-28").drop("last_update",  axis=1)
+sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(),test.getfilterColumn(), "2003-05-26", "2014-02-28").drop("last_update",  axis=1)
 targetDF = utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema())
-
-# print(sourceDF)
-
-testDF = utils.scdtest(sourceDF,targetDF)
-
-print('test_df')
-print(testDF)
-
-# newSourceDF = utils.toSCD2(sourceDF, targetDF)
-# genaretedDF = utils.generateSurogateKey(newSourceDF,test.getCode(), list(test.getNaturalKey().split(" ")))
-utils.fillPosgres(testDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName(), test.getInsertionType())
+SCD_DF = utils.scdtest(sourceDF,targetDF, list(test.getSurogateKey().split(" ")), test.getNaturalKey())
+dest_col_list = list(utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema()).columns)
+genaretedDF = utils.generateSurogateKey(SCD_DF, test.getCode(), list(test.getSurogateKey().split(" ")),dest_col_list)
+# print(genaretedDF)
+utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName(), test.getInsertionType())
 
 # ,test.getfilterColumn(), "2013-05-26", "2005-05-26"
-
-
-
-
-
-
 
 
 # Full - SCDType1
@@ -66,7 +54,7 @@ utils.fillPosgres(testDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',tes
 # incremental
 # create ReadYaml object
 
-# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/incremental.yaml", 'dvdrental.payment')
+# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/incremental.yaml", 'dvdrental.rental')
 # test = ToDV(testread.path, testread.key)
 # sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema()).drop("insertion_date",  axis=1)
 # dest_col_list = list(utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema()).columns)

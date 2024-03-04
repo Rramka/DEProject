@@ -13,6 +13,8 @@ CREATE TABLE dvdrental.film_category (
 	last_update timestamp NULL
 );
 
+
+
 --Incremental
 
 CREATE TABLE dvdrental.payment (
@@ -36,7 +38,9 @@ CREATE TABLE dvdrental.rental (
 	last_update timestamp NULL
 );
 
+
 --SCDTYPE1
+
 
 CREATE TABLE dvdrental.film (
 	gen_film_id int8 NULL,
@@ -54,6 +58,7 @@ CREATE TABLE dvdrental.film (
 	special_features text NULL,
 	fulltext text NULL
 );
+
 
 CREATE TABLE dvdrental.actor (
 	gen_actor_id int8 NULL,
@@ -78,6 +83,7 @@ CREATE TABLE dvdrental.country (
 	last_update timestamp NULL
 );
 
+
 CREATE TABLE dvdrental."language" (
 	gen_language_id int8 NULL,
 	source_language_id int8 NULL,
@@ -91,3 +97,80 @@ CREATE TABLE dvdrental.category (
 	"name" text NULL,
 	last_update timestamp NULL
 );
+
+
+
+--SCDTYPE2
+
+
+CREATE TABLE dvdrental.store (
+	gen_store_id int8 NULL,
+	source_store_id int8 null,
+	start_ts timestamp(6),
+	end_ts timestamp(6),
+	manager_staff_id int8 NULL,
+	address_id int8 NULL
+);
+
+
+
+CREATE TABLE dvdrental.staff (
+	gen_staff_id int8 NULL,
+	source_staff_id int8 NULL,
+	start_ts timestamp(6),
+	end_ts timestamp(6),
+	first_name text NULL,
+	last_name text NULL,
+	address_id int8 NULL,
+	email text NULL,
+	store_id int8 NULL,
+	active bool NULL,
+	username text NULL,
+	"password" text NULL,
+	picture text NULL
+);
+
+
+
+
+CREATE TABLE dvdrental.customer (
+	gen_customer_id int8 NULL,
+	source_customer_id int8 NULL,
+	start_ts timestamp(6),
+	end_ts timestamp(6),
+	store_id int8 NULL,
+	first_name text NULL,
+	last_name text NULL,
+	email text NULL,
+	address_id int8 NULL,
+	activebool bool NULL,
+	create_date date NULL,
+	active int8 NULL
+);
+
+
+CREATE TABLE dvdrental.inventory (
+	gen_inventory_id int8 NULL,
+	source_inventory_id int8 NULL,
+	start_ts timestamp(6),
+	end_ts timestamp(6),
+	film_id int8 NULL,
+	store_id int8 NULL
+);
+
+
+
+CREATE TABLE dvdrental.address (
+	gen_address_id int8 NULL,
+	source_address_id int8 NULL,
+	start_ts timestamp(6),
+	end_ts timestamp(6),
+	address text NULL,
+	address2 text NULL,
+	district text NULL,
+	city_id int8 NULL,
+	postal_code text NULL,
+	phone text NULL
+);
+
+
