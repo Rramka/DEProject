@@ -6,22 +6,36 @@ from managment.cleanstaging.cleanStaging import CleanStaging
 from myFramework.utils.readYaml import ReadYaml
 # from stagingtodv.SCDType1.toDV import ToDV
 from stagingtodv.SCDType2.toDV import ToDV
+from dvtobv.ToBV import ToBV
 from datetime import datetime
+
+# ---------------------------BV----------------
+
+
+testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toBV/film.yaml", 'dvdrental.film')
+test = ToBV(testread.path, testread.key)
+sourcDF = utils.getDF(test.getSourceDBName(), test.getQuery())
+utils.fillPosgres(sourcDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName(), test.getInsertionType())
+
+
+print(sourcDF)
+
+
 
 # ---------------------------DV----------------
 
 
 # SCDType2
 
-testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/SCDType2.yaml", 'dvdrental.address')
-test = ToDV(testread.path, testread.key)
-sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(),test.getfilterColumn(), "2003-05-26", "2014-02-28").drop("last_update",  axis=1)
-targetDF = utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema())
-SCD_DF = utils.scdtest(sourceDF,targetDF, list(test.getSurogateKey().split(" ")), test.getNaturalKey())
-dest_col_list = list(utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema()).columns)
-genaretedDF = utils.generateSurogateKey(SCD_DF, test.getCode(), list(test.getSurogateKey().split(" ")),dest_col_list)
-# print(genaretedDF)
-utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName(), test.getInsertionType())
+# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/SCDType2.yaml", 'dvdrental.address')
+# test = ToDV(testread.path, testread.key)
+# sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema(),test.getfilterColumn(), "2003-05-26", "2014-02-28").drop("last_update",  axis=1)
+# targetDF = utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema())
+# SCD_DF = utils.scd(sourceDF,targetDF, list(test.getSurogateKey().split(" ")), test.getNaturalKey())
+# dest_col_list = list(utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema()).columns)
+# genaretedDF = utils.generateSurogateKey(SCD_DF, test.getCode(), list(test.getSurogateKey().split(" ")),dest_col_list)
+# # print(genaretedDF)
+# utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}',test.getDestTbaleName(), test.getInsertionType())
 
 # ,test.getfilterColumn(), "2013-05-26", "2005-05-26"
 
@@ -29,7 +43,7 @@ utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}
 # Full - SCDType1
 # create ReadYaml object
 
-# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/SCDType1.yaml", 'dvdrental.language')
+# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/SCDType1.yaml", 'dvdrental.city')
 # test = ToDV(testread.path, testread.key)
 # sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema())
 # dest_col_list = list(utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema()).columns)
@@ -54,7 +68,7 @@ utils.fillPosgres(genaretedDF,f'{test.getDestDBName()}',f'{test.getDestSchema()}
 # incremental
 # create ReadYaml object
 
-# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/incremental.yaml", 'dvdrental.rental')
+# testread = ReadYaml("/Users/ramazkapanadze/DEProject/DEProject/conf/toDV/dvdrental/incremental.yaml", 'dvdrental.payment')
 # test = ToDV(testread.path, testread.key)
 # sourceDF = utils.getDF(test.getSourceDBName(), test.getTSourceTableName(),test.getSourceSchema()).drop("insertion_date",  axis=1)
 # dest_col_list = list(utils.getDF(test.getDestDBName(), test.getDestTbaleName(),test.getDestSchema()).columns)

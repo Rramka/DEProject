@@ -10,7 +10,6 @@ dvdrental.film:
   NaturalKey: film_id
   SurogateKey:
     film_id
-    language_id
   Code: 1
 
 dvdrental.country:
@@ -53,7 +52,6 @@ dvdrental.city:
   NaturalKey: city_id
   SurogateKey:
     city_id
-    country_id
   Code: 1
 
 dvdrental.language:

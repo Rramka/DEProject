@@ -11,9 +11,6 @@ dvdrental.rental:
   NaturalKey:
     rental_id
   SurogateKey:
-    inventory_id
-    customer_id
-    staff_id
     rental_id
   Code: 1
 
@@ -31,7 +28,4 @@ dvdrental.payment:
     payment_id
   SurogateKey:
     payment_id
-    customer_id
-    staff_id
-    rental_id
   Code: 1

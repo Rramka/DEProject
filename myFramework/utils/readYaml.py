@@ -16,6 +16,7 @@ class ReadYaml:
         yaml_file_path = os.path.join(script_directory, self.path)
         with open(yaml_file_path, 'r') as file:
             yaml_data = yaml.safe_load(file)
+        # print(yaml_data[self.key]['Query'])
         return yaml_data[self.key]
     
     def getTSourceTableName(self ):
@@ -56,4 +57,7 @@ class ReadYaml:
 
     def getRenameColumn(self):
         return self.__getYaml()['RenameColumn']
+    
+    def getQuery(self):
+        return self.__getYaml()['Query']
     
